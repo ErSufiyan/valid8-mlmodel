@@ -12,7 +12,10 @@ from PIL import Image, ImageDraw
 from ultralytics import YOLO  # ✅ Ultralytics YOLO
 
 # ---------- CORS Setup ----------
-allow_origins = ["*"]
+origins = [
+    "https://valdi8.netlify.app",  # your frontend
+    "http://localhost:3000",       # optional, for local testing
+]
 
 # ---------- Load environment variables ----------
 load_dotenv()
