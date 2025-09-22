@@ -1,6 +1,7 @@
 fastapi==0.111.1
 uvicorn==0.25.0
 python-dotenv==1.0.0
-google-generativeai==0.0.0  # replace with actual latest version if needed
+google-generativeai==0.8.5
 Pillow==10.0.0
 ultralytics==8.0.153
+
