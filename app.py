@@ -11,13 +11,20 @@ import google.generativeai as genai
 from PIL import Image, ImageDraw
 from ultralytics import YOLO  # ✅ Ultralytics YOLO
 
+# ---------- FastAPI App ----------
+app = FastAPI(
+    title="Gemini OCR + YOLO Model API",
+    description="Validate, detect and extract certificate info from images",
+    version="1.1"
+)
+
 # ---------- CORS Setup ----------
 allow_origins = [
     "https://valdi8.netlify.app",  # production frontend
-    "http://localhost:3000"       # local frontend
+    "http://localhost:3000"         # local frontend
 ]
 
-# 2️⃣ Add CORS middleware
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
@@ -25,6 +32,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 # ---------- Load environment variables ----------
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -36,33 +44,15 @@ genai.configure(api_key=GEMINI_API_KEY)
 MODEL_PATH = "best.pt"  # YOLO model
 yolo_model = YOLO(MODEL_PATH)
 
-# ---------- FastAPI App ----------
-app = FastAPI(
-    title="Gemini OCR + YOLO Model API",
-    description="Validate, detect and extract certificate info from images",
-    version="1.1"
-)
-
-# ---------- Add CORS Middleware ----------
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allow_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # ---------- Helper Functions ----------
 def predict_and_draw(image_bytes):
     """Run YOLO on image and return (is_certificate, processed_image_bytes)."""
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     results = yolo_model(img)
 
-    # if YOLO detects nothing → not a certificate
     if len(results[0].boxes) == 0:
         return False, None
 
-    # Draw bounding boxes
     draw = ImageDraw.Draw(img)
     for box in results[0].boxes.xyxy:
         x1, y1, x2, y2 = map(int, box.tolist())
@@ -128,15 +118,11 @@ async def extract_certificate(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="File must be an image")
     image_bytes = await file.read()
 
-    # Step 1: Run YOLO + draw
     is_certificate, processed_image = predict_and_draw(image_bytes)
     if not is_certificate:
         return JSONResponse(content={"error": "Please enter an educational certificate."})
 
-    # Step 2: OCR extraction
     extracted_data = extract_with_gemini(image_bytes)
-
-    # Step 3: Encode processed image to base64
     processed_image_b64 = base64.b64encode(processed_image).decode("utf-8") if processed_image else None
 
     return JSONResponse(content={
@@ -147,4 +133,4 @@ async def extract_certificate(file: UploadFile = File(...)):
 # ---------- Run ----------
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app:app", host="0.0.0.0", port=int(os.environ.get("PORT", 8000)), reload=True)
