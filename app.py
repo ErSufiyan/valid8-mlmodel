@@ -12,11 +12,20 @@ from PIL import Image, ImageDraw
 from ultralytics import YOLO  # ✅ Ultralytics YOLO
 
 # ---------- CORS Setup ----------
-origins = [
+allow_origins = [
     "https://valdi8.netlify.app",  # your frontend
-    "http://localhost:3000",       # optional, for local testing
+    "http://localhost:3000",        # local frontend
+    "*"                             # optional, allow all origins
 ]
 
+# Add CORS middleware to your FastAPI app
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allow_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # ---------- Load environment variables ----------
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
