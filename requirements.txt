@@ -5,3 +5,4 @@ google-generativeai==0.8.5
 Pillow==10.0.0
 ultralytics==8.0.153
 
+
