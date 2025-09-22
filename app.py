@@ -13,12 +13,11 @@ from ultralytics import YOLO  # ✅ Ultralytics YOLO
 
 # ---------- CORS Setup ----------
 allow_origins = [
-    "https://valdi8.netlify.app",  # your frontend
-    "http://localhost:3000",        # local frontend
-    "*"                             # optional, allow all origins
+    "https://valdi8.netlify.app",  # production frontend
+    "http://localhost:3000"       # local frontend
 ]
 
-# Add CORS middleware to your FastAPI app
+# 2️⃣ Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
